@@ -128,7 +128,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    ROS_ERROR("Failed to get param 'DCmotor_period_speed_max'\n");
+    ROS_ERROR("iDCmotor failed to get param 'DCmotor_period_speed_max'\n");
   }
 
   if (n.getParam("iDCmotor/DCmotor_period_speed_0", DCmotor_period_speed_0))
@@ -137,7 +137,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    ROS_ERROR("Failed to get param 'DCmotor_period_speed_0'\n");
+    ROS_ERROR("iDCmotor failed to get param 'DCmotor_period_speed_0'\n");
   }
 
   if (n.getParam("iDCmotor/DCmotor_period_speed_min", DCmotor_period_speed_min))
@@ -146,7 +146,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    ROS_ERROR("Failed to get param 'DCmotor_period_speed_min'\n");
+    ROS_ERROR("iDCmotor failed to get param 'DCmotor_period_speed_min'\n");
   }
 
   if (n.getParam("iDCmotor/DCmotor_speed_max", DCmotor_speed_max))
@@ -155,7 +155,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    ROS_ERROR("Failed to get param 'DCmotor_speed_max'\n");
+    ROS_ERROR("iDCmotor failed to get param 'DCmotor_speed_max'\n");
   }
 
   if (n.getParam("iDCmotor/DCmotor_speed_min", DCmotor_speed_min))
@@ -164,7 +164,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    ROS_ERROR("Failed to get param 'DCmotor_speed_min'\n");
+    ROS_ERROR("iDCmotor failed to get param 'DCmotor_speed_min'\n");
   }
 
   ros::spin();

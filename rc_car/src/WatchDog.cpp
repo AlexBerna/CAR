@@ -11,8 +11,8 @@ void gps_timer_callback(const ros::WallTimerEvent& a, ros::Publisher * pub)
 {
   rc_car::RSRMsg msg;
 
-  msg.run = 0;
-  msg.reset = 0;
+  msg.run = false;
+  msg.reset = false;
   pub->publish(msg);
 
   ROS_ERROR("No data received from GPS since at least %f seconds. Car stoped.", gps_timer_duration);
@@ -30,13 +30,13 @@ void fix_callback(const rc_car::GPSFix::ConstPtr& msg, ros::NodeHandle * n, ros:
 
     if(modeAuto)
     {
-      RSR_msg.run = 1;
-      RSR_msg.reset = 0;
+      RSR_msg.run = true;
+      RSR_msg.reset = false;
       pub->publish(RSR_msg);
     }
   }
 
-  ROS_INFO("WatchDog received a message from extended_fix");
+  //ROS_INFO("WatchDog received a message from extended_fix");
 }
 
 void RSR_process(const rc_car::RSRMsg::ConstPtr& RSR)
@@ -72,7 +72,7 @@ int main(int argc, char **argv)
   ros::Subscriber tRSR_sub = n.subscribe("tRSR", 1000, RSR_process);
   ros::Subscriber tSwitchMode_sub = n.subscribe("tSwitchMode", 1000, tSwitchMode_callback);
   ros::Publisher tRSR_pub = n.advertise<rc_car::RSRMsg>("tRSR", 1000);
-  ros::Subscriber tFix = n.subscribe<rc_car::GPSFix>("fix", 1000, boost::bind(&fix_callback, _1, &n, &tRSR_pub));
+  ros::Subscriber tFix = n.subscribe<rc_car::GPSFix>("extended_fix", 1000, boost::bind(&fix_callback, _1, &n, &tRSR_pub));
   
   //ros::Publisher tError_pub = n.advertise<Error>("tError", 1000);
 

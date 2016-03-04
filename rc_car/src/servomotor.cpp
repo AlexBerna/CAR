@@ -125,7 +125,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    ROS_ERROR("Failed to get param 'servo_period_angle_max'\n");
+    ROS_ERROR("iServomotor failed to get param 'servo_period_angle_max'\n");
   }
 
   if (n.getParam("iServomotor/servo_period_angle_0", servo_period_angle_0))
@@ -134,7 +134,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    ROS_ERROR("Failed to get param 'servo_period_angle_0'\n");
+    ROS_ERROR("iServomotor failed to get param 'servo_period_angle_0'\n");
   }
 
   if (n.getParam("iServomotor/servo_period_angle_min", servo_period_angle_min))
@@ -143,7 +143,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    ROS_ERROR("Failed to get param 'servo_period_angle_min'\n");
+    ROS_ERROR("iServomotor failed to get param 'servo_period_angle_min'\n");
   }
 
   if (n.getParam("iServomotor/servo_angle_max", servo_angle_max))
@@ -152,7 +152,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    ROS_ERROR("Failed to get param 'servo_angle_max'\n");
+    ROS_ERROR("iServomotor failed to get param 'servo_angle_max'\n");
   }
 
   if (n.getParam("iServomotor/servo_angle_min", servo_angle_min))
@@ -161,7 +161,7 @@ int main(int argc, char **argv)
   }
   else
   {
-    ROS_ERROR("Failed to get param 'servo_angle_min'\n");
+    ROS_ERROR("iServomotor failed to get param 'servo_angle_min'\n");
   }
 
   ros::spin();
