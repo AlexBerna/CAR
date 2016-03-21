@@ -41,6 +41,7 @@ function draw_car(x)
     plot([C(1,:)], [C(2,:)],'black','LineWidth',2);
     plot([LFW(1,:)], [LFW(2,:)],'black','LineWidth',2);
     plot([RFW(1,:)], [RFW(2,:)],'black','LineWidth',2);
+    plot(x(1), x(2), '+', 'Color', 'blue');
     drawnow(); //pairé avec drawlater(), permet d'éviter l'effet de clignotement désagréable
 endfunction
 
@@ -100,16 +101,35 @@ function y=plotChpVect(OA,OB,R_MAX)
     theta_x = zeros(size(X1,1), size(X1,2));
     theta_y = zeros(size(X1,1), size(X1,2));
     
-    // Extrémités du segment représentant la droite à rejoindre
-    ligne_c1 = [-10 ; (OB(2)-OA(2))/(OB(1)-OA(1))*(-10-OA(1))+OA(2)];
-    ligne_c2 = [10 ; (OB(2)-OA(2))/(OB(1)-OA(1))*(10-OA(1))+OA(2)];
+    // Segment représentant la droite à rejoindre
+    ligne_c = [-10, 10;
+                 0,  0;
+                 0,  0;
+                 1,  1];
+
+    // Segments représentant le couloir de rayon R_MAX autour de la droite à rejoindre
+    ligne_d = [-10, 10;
+               -R_MAX, -R_MAX;
+                 0,  0;
+                 1,  1];
+                 
+    ligne_g = [-10, 10;
+               R_MAX, R_MAX;
+                 0,  0;
+                 1,  1];
     
     alpha = atan(OB(2)-OA(2), OB(1)-OA(1)); // Angle du vecteur AB
-    // Extrémités des segments représentant le couloir de rayon R_MAX autour de la droite à rejoindre
-    ligne_d1 = [ligne_c1(1)+R_MAX.*sin(alpha) ; ligne_c1(2)-R_MAX.*cos(alpha)];
-    ligne_d2 = [ligne_c2(1)+R_MAX.*sin(alpha) ; ligne_c2(2)-R_MAX.*cos(alpha)];
-    ligne_g1 = [ligne_c1(1)-R_MAX.*sin(alpha) ; ligne_c1(2)+R_MAX.*cos(alpha)];
-    ligne_g2 = [ligne_c2(1)-R_MAX.*sin(alpha) ; ligne_c2(2)+R_MAX.*cos(alpha)];
+    
+    // Matrice de transformation des segments (rotation+translation)
+    matRot=[cos(alpha) -sin(alpha) 0 (OA(1)+OB(1))/2;
+            sin(alpha)  cos(alpha) 0 (OA(2)+OB(2))/2;
+               0         0         1 0;
+               0         0         0 1];
+    
+    // Transformation des segments
+    C = matRot*ligne_c;
+    D = matRot*ligne_d;
+    G = matRot*ligne_g;
     
     // Boucle de calcul du champ de vecteur aux points considérés
     for i=1:size(X1,1)
@@ -120,22 +140,22 @@ function y=plotChpVect(OA,OB,R_MAX)
 
     champ(Mx,My,theta_x',theta_y','blue'); // Dessin du champ de vecteur
     // Dessin des éléments associés au vecteur AB
-    plot([[ligne_c1(1), ligne_c2(1)]], [[ligne_c1(2), ligne_c2(2)]],'red','LineWidth',2);
-    plot([[ligne_d1(1), ligne_d2(1)]], [[ligne_d1(2), ligne_d2(2)]],'blue','LineWidth',2);
-    plot([[ligne_g1(1), ligne_g2(1)]], [[ligne_g1(2), ligne_g2(2)]],'blue','LineWidth',2);
-    plot(OA(1), OA(2), 'black','o');
-    plot(OB(1), OB(2), 'black','x');
-    //plot([[OA(1), OB(1)]], [[OA(2), OB(2)]],'red','LineWidth',2);
+    plot([C(1,:)], [C(2,:)],'red','LineWidth',2);
+    plot([D(1,:)], [D(2,:)],'blue','LineStyle',':','LineWidth',2);
+    plot([G(1,:)], [G(2,:)],'blue','LineStyle',':','LineWidth',2);
+    plot(OA(1), OA(2), 'x', 'Color', 'green');
+    plot(OB(1), OB(2), '^', 'Color', 'green');
+
     y=0;
 endfunction
 
 //Corps principal du programme : Simulation
 l=2; // Distance entre les roues arrières et les roues avant
-R_MAX = 2.5; // Rayon du "couloir de la droite", paramètre qui influe sur l'orientation souhaitée
-OA = [1 ; 1]; // Coordonnées du points A
-OB = [-2 ; 2]; // Coordonnées du points B
+R_MAX = 8; // Rayon du "couloir de la droite", paramètre qui influe sur l'orientation souhaitée
+OA = [0 ; 5]; // Coordonnées du points A
+OB = [0 ; -5]; // Coordonnées du points B
 dt=0.01; // Pas de temps
-x=[0;0;0;0;20];// On fixe les conditions initiales
+x=[-8;0;3*%pi/4;0;20];// On fixe les conditions initiales
 u=[0;0];// On fixe les entrées
 angle_braq_max = %pi/4; // Angle de braquage maximum en degrée
 
@@ -145,11 +165,13 @@ clf(0)
 set(gca(),"auto_clear","off") // hold on; en matlab, superposition des courbes
 mtlb_axis('off'); // Pour effacer les axes
 mtlb_axis([-1.5,1.5,-1.5,1.5]);   // Repère
+fSimulator.figure_size = [700,700]; // Dimensions de la fenêtre fSimulator
 fChpVect=scf(1);
 clf(1)
 set(gca(),"auto_clear","off") // hold on; en matlab, superposition des courbes
 mtlb_axis('off'); // Pour effacer les axes
 mtlb_axis([-7,7,-7,7]);   // Repère
+fChpVect.figure_size = [700,700]; // Dimensions de la fenêtre fChpVect
 // Champ de vecteur
 plotChpVect(OA, OB, R_MAX);
 

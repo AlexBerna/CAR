@@ -42,23 +42,31 @@ function plotWP(listeWP, R_MAX)
     a=linspace(0,2*%pi,100);
     b=linspace(-10,10,100);
     s=size(listeWP);
+    plot([listeWP(1,:)], [listeWP(2,:)], 'LineStyle', ':');
     plot(listeWP(1,1), listeWP(2,1),'o'); // Premier waypoint
     
     for i=2:s(2) // Reste des waypoints
-        AB = listeWP(:,i) - listeWP(:,i-1); // Vecteur AB
+        OB = listeWP(:,i);
+        OA = listeWP(:,i-1);
         
-        // équation de la droite perpendiculaire à AB passant par B
-        if AB(2)==0 then
-            x = zeros(1,100) + listeWP(1,i);
-            y = b + listeWP(2,i);
-        else
-            x = b + listeWP(1,i);
-            y = - AB(1)/AB(2)*b + listeWP(2,i);
-        end
+        ligne = [-10, 10; // Segment représentant la droite perpendiculaire à AB passant par B
+                   0,  0;
+                   0,  0;
+                   1,  1];
         
-        plot(x, y, 'Line Style', '--'); // Segment perpendiculaire
-        plot(listeWP(1,i), listeWP(2,i),'x'); // Centre
-        plot(listeWP(1,i)+R_MAX*cos(a), listeWP(2,i)+R_MAX*sin(a)); // Cercle
+        alpha = atan(OB(2)-OA(2), OB(1)-OA(1)) +%pi/2; // Angle du vecteur AB + pi/2
+        
+        // Matrice de transformation des segments (rotation+translation)
+        matRot=[cos(alpha) -sin(alpha) 0 OB(1);
+                sin(alpha)  cos(alpha) 0 OB(2);
+                   0         0         1 0;
+                   0         0         0 1];
+        
+        L = matRot*ligne; // Transformation du segment
+        
+        plot([L(1,:)], [L(2,:)], 'Line Style', '--'); // Segment perpendiculaire
+        plot(OB(1), OB(2),'x'); // Centre
+        plot(OB(1)+R_MAX*cos(a), OB(2)+R_MAX*sin(a)); // Cercle
     end
 endfunction
 
@@ -129,7 +137,7 @@ listeWP = [ 2,-12, 4, 4;  // Liste des waypoints
            -4, 4, 4, 16];
 iWP = 1; // Indice de sélection des waypoints précédent et suivant
 dt=0.01; // Pas de temps
-x=[-10;9;0;0;35];// On fixe les conditions initiales
+x=[-15;0;0;0;35];// On fixe les conditions initiales
 u=[0;0];// On fixe les entrées
 angle_braq_max = %pi/4; // Angle de braquage maximum en degrée
 //OA = x(1:2); // Premier waypoint à la position de départ
@@ -143,6 +151,7 @@ clf(0)
 set(gca(),"auto_clear","off") // hold on; en matlab, superposition des courbes
 mtlb_axis('off'); // Pour effacer les axes
 mtlb_axis([-1.5,1.5,-1.5,1.5]);   // Repère
+fSimulator.figure_size = [700,700]; // Dimensions de la fenêtre
 
 for t=0:dt:30 // Pour t de 0 à 30 par pas de dt
     scf(fSimulator);
@@ -151,19 +160,19 @@ for t=0:dt:30 // Pour t de 0 à 30 par pas de dt
     set(gca(),"auto_clear","off") //hold on; en matlab // superposition des courbes
     mtlb_axis('off'); // pour effacer les axes
     mtlb_axis([-30,30,-30,30]);   // repère
-    plot([[OA(1), OB(1)]], [[OA(2), OB(2)]], 'red','LineWidth',2 );
     plotWP(listeWP, R_MAX);
+    plot([[OA(1), OB(1)]], [[OA(2), OB(2)]], 'red','LineWidth',2 );
     plot(x(1), x(2), '*', 'Color', 'green');
     draw_car(x); // On dessine la position actuelle de la voiture sur la figure fSimulator
     drawnow(); //pairé avec drawlater(), permet d'éviter l'effet de clignotement désagréable
 
     x=x+fctEvolution(x,u).*dt // On évalue la prochaine position (Méthode d'Euler)
     
-    if critereDist(x(1:2), OB, R_MAX)<=0 then
+    if critereDist(x(1:2), OB, R_MAX)<=0 then // Si waypoint B atteint
         iWP = iWP + 1;
-        OA = listeWP(:, iWP);
-        OB = listeWP(:, iWP+1);
-    elseif criterePerp(x(1:2), OA, OB)>=0
+        OA = listeWP(:, iWP);   // Mise à jour du waypoint A
+        OB = listeWP(:, iWP+1); // Mise à jour du waypoint B
+    elseif criterePerp(x(1:2), OA, OB)>=0 // Si perpendiculaire dépassée
         OA = x(1:2);
     end
     
@@ -174,5 +183,5 @@ for t=0:dt:30 // Pour t de 0 à 30 par pas de dt
     // On modifie l'angle des roues avant en fonction de l'orientation souhaitée et de l'orientation actuelle
     x(4) = angleRoues(x(3), theta_des, angle_braq_max);
     
-    //xpause(100*dt); // On met le système en pause
+    xpause(100000000*dt); // On met le système en pause
 end
